@@ -3,12 +3,10 @@
 
 #include "mbed.h"
 #include "arm_book_lib.h"
+#include "matrix_button.h"
 
-#define GREEN_LIGHT_TIME  8000
-#define YELLOW_LIGHT_TIME 5000
-#define RED_LIGHT_TIME    7000
+// Default timing values (will be overridden by keypad input)
 #define YELLOW_BLINK_TIME 500       
-
 
 void auto_mode_init();
 void auto_mode_update();

@@ -1,4 +1,5 @@
-#include "matrix_button.h"
+#include "matrix-button.h"
+
 
 typedef enum {
     MATRIX_KEYPAD_SCANNING,
@@ -6,13 +7,19 @@ typedef enum {
     MATRIX_KEYPAD_KEY_HOLD_PRESSED
 } matrixKeypadState_t;
 
-
+// Global variables
 DigitalOut keypadRowPins[KEYPAD_NUMBER_OF_ROWS] = {PB_3, PB_5, PC_7, PA_15};
 DigitalIn keypadColPins[KEYPAD_NUMBER_OF_COLS]  = {PB_12, PB_13, PB_15, PC_6};
 
-char inputBuffer[MAX_INPUT_LENGTH + 1]; // Lưu trữ số giây nhập vào (cộng thêm 1 để chứa ký tự kết thúc chuỗi)
+char inputBuffer[MAX_INPUT_LENGTH + 1]; // Buffer to store input seconds
 int inputIndex = 0;
 bool inputComplete = false;
+InputState_t currentInputState = GREEN;
+
+// Traffic light timing variables
+int greenTime = 8;
+int yellowTime = 5;
+int redTime = 7;
 
 int accumulatedDebounceMatrixKeypadTime = 0;
 int matrixKeypadCodeIndex = 0;
@@ -26,7 +33,6 @@ char matrixKeypadIndexToCharArray[] = {
 
 matrixKeypadState_t matrixKeypadState;
 
-
 void matrixKeypadInit()
 {
     matrixKeypadState = MATRIX_KEYPAD_SCANNING;
@@ -34,6 +40,13 @@ void matrixKeypadInit()
     for( pinIndex=0; pinIndex<KEYPAD_NUMBER_OF_COLS; pinIndex++ ) {
         (keypadColPins[pinIndex]).mode(PullUp);
     }
+    
+    // Initialize input state
+    currentInputState = GREEN;
+    inputIndex = 0;
+    inputComplete = false;
+    memset(inputBuffer, 0, sizeof(inputBuffer));
+    printf("Bắt đầu cấu hình. Nhập thời gian cho đèn xanh:\n");
 }
 
 char matrixKeypadScan()
@@ -106,44 +119,48 @@ char matrixKeypadUpdate()
     return keyReleased;
 }
 
-void processKeypadInput (){
+void processKeypadInput() {
     char key = matrixKeypadUpdate();
 
     if (key != '\0') {
+        // Display the pressed key
+        printf("%c", key);
+        
         if (key >= '0' && key <= '9' && inputIndex < MAX_INPUT_LENGTH) {
+            // Add digit to buffer
             inputBuffer[inputIndex++] = key;
-            inputBuffer[inputIndex] = '\0'; // Đảm bảo chuỗi kết thúc
-        } else if (key == '#') { // Phím # dùng để xác nhận giá trị hiện tại
+            inputBuffer[inputIndex] = '\0'; // Ensure null termination
+        } else if (key == '#') { // # key confirms the current value
             if (inputIndex > 0) {
-                int timeValue = atoi(inputBuffer); // Chuyển chuỗi thành số nguyên
+                int timeValue = atoi(inputBuffer); // Convert string to integer
                 
-                // Lưu giá trị vào đèn hiện tại
+                // Store value for the current light
                 switch (currentInputState) {
                     case GREEN:
                         greenTime = timeValue;
                         currentInputState = YELLOW;
-                        printf("Đèn xanh: %d giây. Nhập thời gian cho đèn vàng.\n", greenTime);
+                        printf("\nĐèn xanh: %d giây\nNhập thời gian cho đèn vàng: ", greenTime);
                         break;
                     case YELLOW:
                         yellowTime = timeValue;
                         currentInputState = RED;
-                        printf("Đèn vàng: %d giây. Nhập thời gian cho đèn đỏ.\n", yellowTime);
+                        printf("\nĐèn vàng: %d giây\nNhập thời gian cho đèn đỏ: ", yellowTime);
                         break;
                     case RED:
                         redTime = timeValue;
                         inputComplete = true;
-                        printf("Đèn đỏ: %d giây. Cấu hình hoàn tất!\n", redTime);
+                        printf("\nĐèn đỏ: %d giây\nCấu hình hoàn tất!", redTime);
                         break;
                 }
             }
 
-            // Reset bộ đệm để nhập mới
+            // Reset buffer for next input
             inputIndex = 0;
             memset(inputBuffer, 0, sizeof(inputBuffer));
-        
-        } else if (key == '*') { // Phím * dùng để xóa
+        } else if (key == '*') { // * key clears the current input
             inputIndex = 0;
             memset(inputBuffer, 0, sizeof(inputBuffer));
+            printf("\nĐã xóa. Nhập lại: ");
         }
     }
 }
