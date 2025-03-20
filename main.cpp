@@ -1,34 +1,39 @@
-#include "smart_light.h"
+//
+//                       _oo0oo_
+//                      o8888888o
+//                      88" . "88
+//                      (| -_- |)
+//                      0\  =  /0
+//                    ___/`---'\___
+//                  .' \\|     |// '.
+//                 / \\|||  :  |||// \
+//                / _||||| -:- |||||- \
+//               |   | \\\  -  /// |   |
+//               | \_|  ''\---/''  |_/ |
+//               \  .-\__  '-'  ___/-. /
+//             ___'. .'  /--.--\  `. .'___
+//          ."" '<  `.___\_<|>_/___.' >' "".
+//         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//         \  \ `_.   \_ __\ /__ _/   .-` /  /
+//     =====`-.____`.___ \_____/___.-`___.-'=====
+//                       `=---='
+//
+//
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#include "mbed.h"
+#include "traffic_light_system.h"
 
 int main()
 {
-    smart_light_init();
-
-    while (true){
-        smart_light_update();
+    // Initialize the traffic light system
+    trafficLightSystemInit();
+    
+    while (true) {
+        // Update and process system state
+        trafficLightSystemUpdate();
+        
+        // Sleep for 10ms before next update
+        ThisThread::sleep_for(10ms);
     }
-    // greenLed = OFF;
-    // redLed = OFF;
-    // yellowLed = OFF;
-
-    // while (true) {
-    //     greenLed = 1;
-    //     yellowLed = 0;
-    //     redLed = 0;
-    //     thread_sleep_for(GREEN_LIGHT_TIME);
-
-    //     int elapsedTime = 0;
-    //     while (elapsedTime < YELLOW_LIGHT_TIME) {
-    //         greenLed = 0;
-    //         yellowLed = !yellowLed;
-    //         thread_sleep_for(YELLOW_BLINK_TIME);
-    //         elapsedTime += YELLOW_BLINK_TIME;
-    //     }
-    //     yellowLed = 0;
-
-    //     greenLed = 0;
-    //     yellowLed = 0;
-    //     redLed = 1;
-    //     thread_sleep_for(RED_LIGHT_TIME);
-    // }
 }
